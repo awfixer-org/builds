@@ -1,5 +1,9 @@
 name: ci
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   push:
 
