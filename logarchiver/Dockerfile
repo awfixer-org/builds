@@ -18,7 +18,7 @@ RUN apk update && apk upgrade
 COPY --from=0 /tmp/compile/logarchiver /srv/logarchiver/logarchiver
 RUN chmod +x /srv/logarchiver/logarchiver
 
-COPY --from=0 /tmp/compile/public /srv/logarchiver/public
+COPY --from=0 /tmp/compile/logarchiver /srv/logarchiver/public
 
 RUN adduser container --disabled-password --no-create-home
 USER container
