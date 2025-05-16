@@ -47,9 +47,9 @@ jobs:
             echo "Building Dockerfile in directory: $dir"
             # Extract the directory name for tagging
             image_name=$(basename "$dir")
-            docker build -t "user/${image_name}:latest" "$dir"
-            docker push "user/${image_name}:latest"
-            docker build -t "ghcr.io/user/${image_name}:latest" "$dir"
-            docker push "ghcr.io/user/${image_name}:latest"
+            docker build -t "awfixer/${image_name}:latest" "$dir"
+            docker push "awfixer/${image_name}:latest"
+            docker build -t "ghcr.io/awfixer-org/${image_name}:latest" "$dir"
+            docker push "ghcr.io/awfixer-org/${image_name}:latest"
 
           done < docker_dirs.txt
