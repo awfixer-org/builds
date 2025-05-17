@@ -1,0 +1,8 @@
+name: checks and balances
+
+permissions:
+  packages: write
+  contents: read
+
+on:
+  push:
