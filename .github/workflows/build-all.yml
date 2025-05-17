@@ -7,14 +7,14 @@ permissions:
 on:
   push:
   schedule:
-    - 0 0 * * *
+    - cron: "0 0 * * *"
 
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Use the latest version
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -38,24 +38,38 @@ jobs:
       - name: Find Dockerfile directories
         id: find_dockerfiles
         run: |
+          echo "dirs=" >> $GITHUB_OUTPUT # Initialize the output variable
           find . -maxdepth 1 -type d ! -name ".*" -print0 | while IFS= read -r -d $'\0' dir; do
             if [ -f "$dir/Dockerfile" ]; then
-              echo "::set-output name=dirs::$dir"
-              echo "$dir" >> docker_dirs.txt
+              # Append to the dirs output variable, space-separated
+              # Also remove the leading './' if present for cleaner names
+              cleaned_dir=$(echo "$dir" | sed 's|^\./||')
+              echo "dirs<<EOF" >> $GITHUB_OUTPUT
+              echo "$cleaned_dir" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+              echo "$cleaned_dir" >> docker_dirs.txt
             fi
           done
           echo "Found Dockerfiles in the following directories (excluding those starting with '.'):"
-          cat docker_dirs.txt #output directories
+          cat docker_dirs.txt # Output directories for logging
 
       - name: Build and push Docker images
+        if: steps.find_dockerfiles.outputs.dirs != '' # Only run if Dockerfiles were found
         run: |
-          while read -r dir; do
+          # Read the directories from the output of the previous step
+          echo "${{ steps.find_dockerfiles.outputs.dirs }}" | while read -r dir; do
+            if [ -z "$dir" ]; then # Skip empty lines
+              continue
+            fi
             echo "Building Dockerfile in directory: $dir"
             # Extract the directory name for tagging
             image_name=$(basename "$dir")
+
+            echo "Building and pushing awfixer/${image_name}:latest"
             docker build -t "awfixer/${image_name}:latest" "$dir"
             docker push "awfixer/${image_name}:latest"
+
+            echo "Building and pushing ghcr.io/awfixer-org/${image_name}:latest"
             docker build -t "ghcr.io/awfixer-org/${image_name}:latest" "$dir"
             docker push "ghcr.io/awfixer-org/${image_name}:latest"
-
-          done < docker_dirs.txt
+          done
