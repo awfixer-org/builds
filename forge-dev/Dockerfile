@@ -41,7 +41,7 @@ RUN chmod 755 /tmp/local/usr/bin/entrypoint \
               /go/src/code.gitea.io/gitea/environment-to-ini
 RUN chmod 644 /go/src/code.gitea.io/gitea/contrib/autocompletion/bash_autocomplete
 
-FROM docker.io/library/alpine:3.21
+FROM docker.io/library/alpine:3.23
 LABEL maintainer="maintainers@gitea.io"
 
 EXPOSE 22 3000
